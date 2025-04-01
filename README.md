@@ -1,2 +1,3 @@
 jdK 21
-build-tool : Maven
+<br>build-tool : Maven
+<br>DB:MySQL
