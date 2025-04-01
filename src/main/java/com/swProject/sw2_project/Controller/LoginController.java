@@ -1,7 +1,9 @@
 package com.swProject.sw2_project.Controller;
 
+import com.swProject.sw2_project.Service.JoinService;
 import com.swProject.sw2_project.Service.LoginService;
 import com.swProject.sw2_project.Util.Jwt.JwtUtil;
+import org.hibernate.mapping.Join;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,10 +16,13 @@ public class LoginController {
     @Autowired
     LoginService loginService;
 
+    @Autowired
+    JoinService joinService;
+
     // 회원가입 처리
     @PostMapping("/login/register")
     public String userRegister(@RequestParam Map<String, Object> paramMap) {
-        return loginService.registerUserLogin(paramMap).toString();
+        return joinService.registerUserLogin(paramMap).toString();
 
 
     }
@@ -30,7 +35,7 @@ public class LoginController {
 
         boolean isAuthenticated = loginService.authenticateUser(userId, password);
         if (isAuthenticated) {
-            String token = JwtUtil.generateToken(userId);
+//            String token = JwtUtil.generateToken(userId);
             return "Login successful!";
         } else {
             return "Invalid credentials!";

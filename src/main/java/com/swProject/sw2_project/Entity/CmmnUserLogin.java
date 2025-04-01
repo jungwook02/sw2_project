@@ -1,32 +1,46 @@
 package com.swProject.sw2_project.Entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-@Data
+
 @Entity
+@Data
+
 public class CmmnUserLogin {
         @Id
+        @Column(name = "userId", nullable = false)
         private String userId;
 
+        @Column(name = "userPassword")
         private String userPassword;
+
+        @Column(name = "beforeUserPassword")
         private String beforeUserPassword;
+
+        @Column(name = "passwordExpDt")
         private LocalDate passwordExpDt;
-        private String loginType;
+
+        @Column(name = "firPasswordYn")
         private String firPasswordYn;
+
+        @Column(name = "loginType")
+        private String loginType;
+
+        @Column(name = "userYn")
         private String useYn;
-        private LocalDate delYn;
+
+        @Column(name = "delYn")
+        private String delYn;
+
+        @Column(name = "regDt")
         private LocalDate regDt;
+
+        @Column(name = "chgDt")
         private LocalDate chgDt;
 
-        @OneToMany(mappedBy = "cmmnUserLogin")
-        private List<CmmnUser> cmmnUserList = new ArrayList<>();
 }
-
-
-
