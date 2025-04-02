@@ -32,8 +32,8 @@ public class CmmnUser {
     // 변경_날짜
     private String chgDt;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @MapsId //@MapsId 는 @id로 지정한 컬럼에 @OneToOne 이나 @ManyToOne 관계를 매핑시키는 역할
+    @OneToOne
+    @MapsId  // userId를 공유
     @JoinColumn(name = "userId")
     private CmmnUserLogin cmmnUserLogin;
 }

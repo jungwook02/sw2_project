@@ -10,7 +10,6 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-
 public class CmmnUserLogin {
         @Id
         @Column(name = "userId", nullable = false)
@@ -43,4 +42,8 @@ public class CmmnUserLogin {
         @Column(name = "chgDt")
         private LocalDate chgDt;
 
+        @OneToOne(mappedBy = "cmmnUserLogin")
+        @PrimaryKeyJoinColumn
+        private CmmnUser cmmnUser;
 }
+

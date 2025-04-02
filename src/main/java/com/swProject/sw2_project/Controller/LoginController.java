@@ -22,7 +22,18 @@ public class LoginController {
     // 회원가입 처리
     @PostMapping("/login/register")
     public String userRegister(@RequestParam Map<String, Object> paramMap) {
+
+
         return joinService.registerUserLogin(paramMap).toString();
+
+
+    }
+
+    @PostMapping("/login/register/user")
+    public String usercmmnRegister(@RequestParam Map<String, Object> paramMap) {
+
+
+        return joinService.registerUser(paramMap).toString();
 
 
     }
