@@ -29,10 +29,10 @@ public class JoinService {
         try {
             // 비밀번호 암호화
             String encodedPassword = passwordEncoder.encode((String) paramMap.get("password"));
-
+            String userId = (String) paramMap.get("userId");
             // 사용자 로그인 정보 생성
             CmmnUserLogin cmmnUserLogin = new CmmnUserLogin();
-            cmmnUserLogin.setUserId((String) paramMap.get("userId"));  // 수동으로 값 설정
+            cmmnUserLogin.setUserId(userId);
             cmmnUserLogin.setUserPassword(encodedPassword);
             cmmnUserLogin.setBeforeUserPassword("");
             cmmnUserLogin.setPasswordExpDt(LocalDate.now().plusMonths(3));
@@ -45,29 +45,35 @@ public class JoinService {
             // 사용자 로그인 정보 저장
             cmmnUserLoginRepository.save(cmmnUserLogin);
 
-            // 사용자 정보 생성
-//            CmmnUser cmmnUser = new CmmnUser();
-//            cmmnUser.setUserId((String) paramMap.get("userId"));
-//            cmmnUser.setUserNm((String) paramMap.get("userNm"));
-//            cmmnUser.setUserAge((String) paramMap.get("userAge"));
-//            cmmnUser.setUserEmail((String) paramMap.get("userEmail"));
-//            cmmnUser.setTelNo((String) paramMap.get("telNo"));
-//            cmmnUser.setRegDt(String.valueOf(LocalDate.now()));
-//            cmmnUser.setChgDt(String.valueOf(LocalDate.now()));
-//
-//            // CmmnUserLogin 설정
-//            cmmnUser.setCmmnUserLogin(cmmnUserLogin);  // CmmnUser에 CmmnUserLogin 연결
-//
-//            // 사용자 정보 저장
-//            cmmnUserRepository.save(cmmnUser); // 이후에 CmmnUser를 저장
+
+            // 사용자 정보 저장
+            CmmnUser cmmnUser = new CmmnUser();
+            cmmnUser.setCmmnUserLogin(cmmnUserLogin);
+
+            cmmnUser.setUserId(cmmnUserLogin.getUserId());
+            cmmnUser.setUserNm((String) paramMap.get("userNm"));
+            cmmnUser.setUserAge((String) paramMap.get("userAge"));
+            cmmnUser.setUserEmail((String) paramMap.get("userEmail"));
+            cmmnUser.setTelNo((String) paramMap.get("telNo"));
+            cmmnUser.setRegDt(String.valueOf(LocalDate.now()));
+            cmmnUser.setChgDt(String.valueOf(LocalDate.now()));
+
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++");
+            System.out.println(cmmnUserLogin);
+
+            // CmmnUserLogin 연결
+
+
+            // 사용자 정보 저장
+            cmmnUserRepository.save(cmmnUser);
 
             rtnMap.put("status", "success");
         } catch (Exception e) {
             rtnMap.put("status", "fail");
             rtnMap.put("error", e.getMessage());
+            throw e;  // 예외를 던져서 롤
         }
 
         return rtnMap;
     }
 }
-

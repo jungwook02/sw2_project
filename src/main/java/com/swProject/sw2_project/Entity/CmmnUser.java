@@ -10,7 +10,7 @@ import lombok.Data;
 public class CmmnUser {
     // 사용자_아이디 (Primary Key로 지정)
     @Id
-    @Column(name = "USER_ID", length = 20, nullable = false)
+    @Column(name = "user_id", length = 20, nullable = false)
     private String userId;
 
     // 사용자_이름
@@ -34,6 +34,6 @@ public class CmmnUser {
 
     @OneToOne(fetch = FetchType.EAGER)
     @MapsId //@MapsId 는 @id로 지정한 컬럼에 @OneToOne 이나 @ManyToOne 관계를 매핑시키는 역할
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private CmmnUserLogin cmmnUserLogin;
 }
