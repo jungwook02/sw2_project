@@ -66,10 +66,6 @@ public class JoinService {
     public String chkUserId(String userId) {
         try {
             String chkUserId = String.valueOf(cmmnUserLoginRepository.findByChkUserId(userId));
-
-            System.out.print(chkUserId);
-            System.out.println("++++++++++++++++++++++++++++++++++");
-
             if ("null".equals(chkUserId)) {
                 return "success";
             }
