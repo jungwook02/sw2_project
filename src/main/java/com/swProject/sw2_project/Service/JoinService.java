@@ -8,7 +8,6 @@ import com.swProject.sw2_project.Repository.CmmnUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +23,6 @@ public class JoinService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @Transactional
     public Map<String, Object> registerUserLogin(CmmnJoinDTO dto) {
         Map<String, Object> rtnMap = new HashMap<>();
 
@@ -64,6 +62,21 @@ public class JoinService {
         }
 
         return rtnMap;
+    }
+    public String chkUserId(String userId) {
+        try {
+            String chkUserId = String.valueOf(cmmnUserLoginRepository.findByChkUserId(userId));
+
+            System.out.print(chkUserId);
+            System.out.println("++++++++++++++++++++++++++++++++++");
+
+            if ("null".equals(chkUserId)) {
+                return "success";
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+            return "fail";
     }
 
 }

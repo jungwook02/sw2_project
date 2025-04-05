@@ -18,15 +18,6 @@ public class LoginController {
     @Autowired
     LoginService loginService;
 
-    @Autowired
-    JoinService joinService;
-
-    // 회원가입 처리
-    @PostMapping("/login/register")
-    public String userRegister(@RequestBody CmmnJoinDTO cmmnJoinDTO) {
-        return joinService.registerUserLogin(cmmnJoinDTO).toString();
-    }
-
     // 로그인 처리
     @PostMapping("/login")
     public String login(@RequestParam Map<String, Object> paramMap) {
@@ -35,7 +26,7 @@ public class LoginController {
 
         boolean isAuthenticated = loginService.authenticateUser(userId, password);
         if (isAuthenticated) {
-//            String token = JwtUtil.generateToken(userId);
+            String token = JwtUtil.generateToken(userId);
             return "Login successful!";
         } else {
             return "Invalid credentials!";
