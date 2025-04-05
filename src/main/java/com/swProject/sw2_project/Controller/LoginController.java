@@ -1,11 +1,13 @@
 package com.swProject.sw2_project.Controller;
 
+import com.swProject.sw2_project.DTO.CmmnJoinDTO;
 import com.swProject.sw2_project.Service.JoinService;
 import com.swProject.sw2_project.Service.LoginService;
 import com.swProject.sw2_project.Util.Jwt.JwtUtil;
 import org.hibernate.mapping.Join;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,21 +23,8 @@ public class LoginController {
 
     // 회원가입 처리
     @PostMapping("/login/register")
-    public String userRegister(@RequestParam Map<String, Object> paramMap) {
-
-
-        return joinService.registerUserLogin(paramMap).toString();
-
-
-    }
-
-    @PostMapping("/login/register/user")
-    public String usercmmnRegister(@RequestParam Map<String, Object> paramMap) {
-
-
-        return joinService.registerUser(paramMap).toString();
-
-
+    public String userRegister(@RequestBody CmmnJoinDTO cmmnJoinDTO) {
+        return joinService.registerUserLogin(cmmnJoinDTO).toString();
     }
 
     // 로그인 처리

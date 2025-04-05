@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-
 @Entity
 @Data
 public class CmmnUserLogin {

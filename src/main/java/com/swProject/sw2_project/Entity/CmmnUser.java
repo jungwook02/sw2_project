@@ -19,6 +19,9 @@ public class CmmnUser {
     // 사용자_나이
     private String userAge;
 
+    @Version  // 낙관적 락을 위한 버전 관리 필드 추가
+    private Long version;
+
     // 사용자_이메일
     @Column(nullable = false)
     private String userEmail;
