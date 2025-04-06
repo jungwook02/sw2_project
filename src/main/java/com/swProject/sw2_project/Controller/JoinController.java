@@ -1,6 +1,7 @@
 package com.swProject.sw2_project.Controller;
 
 import com.swProject.sw2_project.DTO.CmmnJoinDTO;
+import com.swProject.sw2_project.Service.EmailAuthService;
 import com.swProject.sw2_project.Service.JoinService;
 import jakarta.persistence.Access;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ public class JoinController {
     @Autowired
     JoinService joinService;
 
+    @Autowired
+    EmailAuthService emailAuthService;
 
     // 회원가입 처리
     @PostMapping("/register")
@@ -37,7 +40,15 @@ public class JoinController {
 
     }
 
-
-
+    @PostMapping("/sendAuthEmail")
+    public String sendAuthEmail(@RequestParam String userEmail){
+        try {
+            emailAuthService.sendEmail(userEmail);
+            return "이메일을 성공적으로 보냈습니다!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "이메일 전송에 실패했습니다.";
+        }
+    }
 
 }

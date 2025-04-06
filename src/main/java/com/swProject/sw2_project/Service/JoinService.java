@@ -8,6 +8,8 @@ import com.swProject.sw2_project.Repository.CmmnUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,5 +76,7 @@ public class JoinService {
         }
             return "fail";
     }
+
+
 
 }
