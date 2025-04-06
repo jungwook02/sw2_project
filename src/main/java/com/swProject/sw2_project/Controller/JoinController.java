@@ -51,4 +51,14 @@ public class JoinController {
         }
     }
 
+    @PostMapping("/authEmail")
+    public String authEmail(@RequestParam String userEmail,@RequestParam int authCode){
+        try {
+            return emailAuthService.validateAuthCode(userEmail,authCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "이메일 전송에 실패했습니다.";
+        }
+    }
+
 }

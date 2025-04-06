@@ -10,6 +10,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 @Service
@@ -19,6 +21,12 @@ public class EmailAuthService {
 
     @Autowired
     private JavaMailSender emailSender;
+
+    // 인증번호와 시간 정보를 저장할 Map
+    private final Map<String, AuthInfo> authMap = new HashMap<>();
+
+    // 인증번호 유효 시간 (10분)
+    private static final long EXPIRATION_TIME = 10 * 60 * 1000;  // 10분 (밀리초 단위)
 
     public String sendEmail(String userEmail) {
         Random random = new Random();
@@ -35,6 +43,7 @@ public class EmailAuthService {
                 + "</strong></div>"
                 + "<br><p>위 인증코드를 회원가입 페이지에 입력해주세요.</p>"
                 + "</body></html>";
+
         try {
             // MimeMessage 객체 생성
             MimeMessage message = emailSender.createMimeMessage();
@@ -46,6 +55,9 @@ public class EmailAuthService {
 
             helper.setText(htmlMsg, true);  // HTML 이메일 (true는 HTML을 의미)
 
+            // 인증번호와 유효시간을 저장
+            authMap.put(userEmail, new AuthInfo(authNumber, System.currentTimeMillis()));
+
             emailSender.send(message);
             log.info("회원가입 이메일 인증코드 -> userEmail:  " + userEmail + " 인증번호: " + authNumber);
             return "전송 성공!";
@@ -55,6 +67,47 @@ public class EmailAuthService {
             return "이메일 전송에 실패했습니다.";
         } catch (MessagingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public String validateAuthCode(String userEmail, int authCode) {
+        AuthInfo authInfo = authMap.get(userEmail);
+
+        if (authInfo == null) {
+            return "인증번호가 존재하지 않거나 만료되었습니다.";
+        }
+
+        // 인증번호가 만료되었는지 확인
+        if (System.currentTimeMillis() - authInfo.getTimestamp() > EXPIRATION_TIME) {
+            authMap.remove(userEmail);  // 만료된 인증번호 삭제
+            return "인증번호가 만료되었습니다. 새 인증번호를 요청하세요.";
+        }
+
+        // 인증번호가 일치하는 경우
+        if (authInfo.getAuthCode() == authCode) {
+            authMap.remove(userEmail);  // 인증 성공 후 인증번호 삭제
+            return "인증 성공!";
+        } else {
+            return "인증번호가 일치하지 않습니다.";
+        }
+    }
+
+    // 인증번호와 시간 정보를 저장할 클래스
+    private static class AuthInfo {
+        private final int authCode;
+        private final long timestamp;
+
+        public AuthInfo(int authCode, long timestamp) {
+            this.authCode = authCode;
+            this.timestamp = timestamp;
+        }
+
+        public int getAuthCode() {
+            return authCode;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
         }
     }
 }
