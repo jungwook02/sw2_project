@@ -36,7 +36,7 @@ public class EmailAuthService {
         // HTML 이메일 본문
         String htmlMsg = "<html><body>"
                 + "<h2>안녕하세요,</h2>"
-                + "<p>SW2 프로젝트 회원가입을 위한 인증코드입니다.</p>"
+                + "<p>프로젝트 회원가입을 위한 인증코드입니다.</p>"
                 + "<div style='border:1px solid #000; padding:10px; text-align:center;'>"
                 + "<strong style='font-size:1.5em;'>"
                 + authNumber
@@ -49,7 +49,7 @@ public class EmailAuthService {
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setSubject("SW2 프로젝트 회원가입 인증 코드");
+            helper.setSubject("프로젝트 회원가입 인증 코드");
             helper.setFrom("parkwooga@gmail.com"); // 발신자 이메일
             helper.setTo(userEmail); // 받는 이메일 주소
 
@@ -60,6 +60,7 @@ public class EmailAuthService {
 
             emailSender.send(message);
             log.info("회원가입 이메일 인증코드 -> userEmail:  " + userEmail + " 인증번호: " + authNumber);
+            log.info("ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ"+ authMap);
             return "전송 성공!";
 
         } catch (MailException e) {
@@ -72,21 +73,19 @@ public class EmailAuthService {
 
     public String validateAuthCode(String userEmail, int authCode) {
         AuthInfo authInfo = authMap.get(userEmail);
-
         if (authInfo == null) {
             return "인증번호가 존재하지 않거나 만료되었습니다.";
         }
 
         // 인증번호가 만료되었는지 확인
         if (System.currentTimeMillis() - authInfo.getTimestamp() > EXPIRATION_TIME) {
-            authMap.remove(userEmail);  // 만료된 인증번호 삭제
+            authMap.remove(userEmail);
             return "인증번호가 만료되었습니다. 새 인증번호를 요청하세요.";
         }
 
         // 인증번호가 일치하는 경우
         if (authInfo.getAuthCode() == authCode) {
-            authMap.remove(userEmail);  // 인증 성공 후 인증번호 삭제
-            return "인증 성공!";
+            return "Y";
         } else {
             return "인증번호가 일치하지 않습니다.";
         }

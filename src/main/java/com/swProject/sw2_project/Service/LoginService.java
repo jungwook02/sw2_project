@@ -1,21 +1,17 @@
 package com.swProject.sw2_project.Service;
 
-
-
-import com.swProject.sw2_project.Entity.CmmnUser;
+import com.swProject.sw2_project.DTO.CmmnUserLoginTokenDTO;
 import com.swProject.sw2_project.Entity.CmmnUserLogin;
+import com.swProject.sw2_project.Entity.CmmnUserLoginToken;
+import com.swProject.sw2_project.Entity.UserLoginTokenId;
 import com.swProject.sw2_project.Repository.CmmnUserLoginRepository;
-import com.swProject.sw2_project.Repository.CmmnUserRepository;
+import com.swProject.sw2_project.Repository.CmmnUserLoginTokenRepository;
+import com.swProject.sw2_project.Util.Jwt.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate5.HibernateOperations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.transaction.annotation.Transactional;
+import java.util.Date;
 
 @Service
 public class LoginService {
@@ -24,21 +20,61 @@ public class LoginService {
     private CmmnUserLoginRepository cmmnUserLoginRepository;
 
     @Autowired
-    private CmmnUserRepository cmmnUserRepository;
+    private CmmnUserLoginTokenRepository cmmnUserLoginTokenRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    // 로그인 인증 및 JWT 토큰 발급
+    public String authenticateUser(String userId, String password) {
+        // 사용자 로그인 정보 조회
+        CmmnUserLogin userLogin = cmmnUserLoginRepository.findByUserId(userId);
 
-    public boolean authenticateUser(String userId, String password) {
-        CmmnUserLogin cmmnUserLogin = cmmnUserLoginRepository.findByUserId(userId);
-//        if (cmmnUserLogin != null && passwordEncoder.matches(password, cmmnUserLogin.getUserPassword())) {
-//            return true;  // 로그인 성공
-//        }
-        return false;  // 로그인 실패
+        if (userLogin != null && passwordEncoder.matches(password, userLogin.getUserPassword())) {
+            // 비밀번호 일치시 JWT 토큰 생성
+            String accessToken = jwtUtil.generateAccessToken(userId);
+            String refreshToken = jwtUtil.generateRefreshToken(userId);
+
+            // 리프레시 토큰 저장 (DB에 저장)
+            saveRefreshToken(userId, refreshToken);
+
+            // 토큰 유효기간 설정
+            Date tokenExpiration = jwtUtil.extractClaims(accessToken).getExpiration();
+
+            // CmmnUserLoginTokenDTO 객체 생성
+            // tokenExpiration을 Date로 바로 전달
+            CmmnUserLoginTokenDTO loginTokenDTO = new CmmnUserLoginTokenDTO(userId, refreshToken, tokenExpiration.toString());
+
+            // CmmnUserLoginToken 엔티티 생성 후 저장
+            saveUserLoginToken(loginTokenDTO);
+
+            // Access Token 반환
+            return accessToken;  // 생성된 JWT 토큰 반환
+        }
+
+        // 인증 실패 시
+        return "Invalid credentials!";
     }
 
 
+    // Refresh Token 저장
+    public void saveRefreshToken(String userId, String refreshToken) {
+        // DTO 객체 생성
+        CmmnUserLoginTokenDTO loginTokenDTO = new CmmnUserLoginTokenDTO(userId, refreshToken, "7d");
+        saveUserLoginToken(loginTokenDTO);
+    }
 
+    // UserLoginTokenDTO를 받아서 DB에 저장하는 메서드
+    private void saveUserLoginToken(CmmnUserLoginTokenDTO loginTokenDTO) {
+        // DTO -> Entity 변환
+        UserLoginTokenId tokenId = new UserLoginTokenId(loginTokenDTO.getUserId(), loginTokenDTO.getRefreshToken());
+        CmmnUserLoginToken userLoginToken = new CmmnUserLoginToken(tokenId, loginTokenDTO.getTokenExpiration());
 
+        // DB에 저장
+        cmmnUserLoginTokenRepository.save(userLoginToken);
+    }
 }
+
 

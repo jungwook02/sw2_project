@@ -53,8 +53,7 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf.disable()) // CSRF 보호 기능 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("*").permitAll() // 로그인 및 회원가입 엔드포인트 접근 허용
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()  // 모든 요청에 대해 인증 없이 접근 허용
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
