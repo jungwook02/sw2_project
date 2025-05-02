@@ -20,26 +20,25 @@ public class LoginController {
     @Autowired
     LoginService loginService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam Map<String, Object> paramMap,
                                         HttpServletResponse response) {
         String userId = (String) paramMap.get("userId");
-        String password = (String) paramMap.get("password");
+        String password = (String) paramMap.get("userPassword");
 
-        // 1. 사용자 인증
         boolean isAuthenticated = Boolean.parseBoolean(loginService.authenticateUser(userId, password));
 
         if (isAuthenticated) {
-            // 2. Access Token & Refresh Token 생성
-            String accessToken = JwtUtil.generateAccessToken(userId);
-            String refreshToken = JwtUtil.generateRefreshToken(userId);
+            String accessToken = jwtUtil.generateAccessToken(userId);
+            String refreshToken = jwtUtil.generateRefreshToken(userId);
 
-            // 3. Refresh Token을 DB에 저장 (서버에서만 관리)
             loginService.saveRefreshToken(userId, refreshToken);
 
-            // 4. 쿠키에 토큰 저장 (Access Token: 클라이언트에서 사용, Refresh Token: 서버에서 관리)
-            addTokenToCookie(response, "accessToken", accessToken, 15 * 60); // 15분
-            addTokenToCookie(response, "refreshToken", refreshToken, 7 * 24 * 60 * 60); // 7일
+            addTokenToCookie(response, "accessToken", accessToken, 15 * 60);
+            addTokenToCookie(response, "refreshToken", refreshToken, 7 * 24 * 60 * 60);
 
             return ResponseEntity.ok("Login successful!");
         } else {

@@ -41,8 +41,10 @@ public class JoinService {
             // 2. CmmnUserLogin 엔티티 생성
             CmmnUserLogin cmmnUserLogin = new CmmnUserLogin();
             cmmnUserLogin.setUserId(dto.getUserId());
-            cmmnUserLogin.setUserPassword(dto.getUserPassword());
-            cmmnUserLogin.setBeforeUserPassword(dto.getBeforeUserPassword());
+            cmmnUserLogin.setUserPassword(passwordEncoder.encode(dto.getUserPassword()));
+            if (dto.getBeforeUserPassword() != null) {
+                cmmnUserLogin.setBeforeUserPassword(passwordEncoder.encode(dto.getBeforeUserPassword()));
+            }
             cmmnUserLogin.setPasswordExpDt(dto.getPasswordExpDt());
             cmmnUserLogin.setFirPasswordYn(dto.getFirPasswordYn());
             cmmnUserLogin.setLoginType(dto.getLoginType());

@@ -7,12 +7,13 @@ import com.swProject.sw2_project.Entity.UserLoginTokenId;
 import com.swProject.sw2_project.Repository.CmmnUserLoginRepository;
 import com.swProject.sw2_project.Repository.CmmnUserLoginTokenRepository;
 import com.swProject.sw2_project.Util.Jwt.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-
+@Slf4j
 @Service
 public class LoginService {
 
@@ -37,14 +38,8 @@ public class LoginService {
             String accessToken = jwtUtil.generateAccessToken(userId);
             String refreshToken = jwtUtil.generateRefreshToken(userId);
 
-            // 리프레시 토큰 저장 (DB에 저장)
             saveRefreshToken(userId, refreshToken);
-
-            // 토큰 유효기간 설정
             Date tokenExpiration = jwtUtil.extractClaims(accessToken).getExpiration();
-
-            // CmmnUserLoginTokenDTO 객체 생성
-            // tokenExpiration을 Date로 바로 전달
             CmmnUserLoginTokenDTO loginTokenDTO = new CmmnUserLoginTokenDTO(userId, refreshToken, tokenExpiration.toString());
 
             // CmmnUserLoginToken 엔티티 생성 후 저장

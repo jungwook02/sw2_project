@@ -3,56 +3,68 @@ package com.swProject.sw2_project.Util.Jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private static final String SECRET_KEY = "your_secret_key";  // 실제 애플리케이션에서는 안전한 키 관리 필요
+
+    // SecretKey를 저장할 String 필드
+    @Value("${jwt.secret}")
+    private String secretKeyString;
+
+    // SecretKey를 반환하는 메소드
+    private SecretKey getSigningKey() {
+        return Keys.secretKeyFor(SignatureAlgorithm.HS256);  // HS256에 적합한 SecretKey 생성
+    }
 
     // Access Token 생성
-    public static String generateAccessToken(String userId) {
+    public String generateAccessToken(String userId) {
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000)) // 15분
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)  // SecretKey 사용
                 .compact();
     }
 
     // Refresh Token 생성
-    public static String generateRefreshToken(String userId) {
+    public String generateRefreshToken(String userId) {
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 7일
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)  // SecretKey 사용
                 .compact();
     }
 
     // JWT에서 Claims 추출
-    public static Claims extractClaims(String token) {
+    public Claims extractClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(getSigningKey())  // SecretKey 사용
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
     // JWT 유효성 검사
-    public static boolean validateToken(String token, String userId) {
+    public boolean validateToken(String token, String userId) {
         String extractedUserId = extractUserId(token);
         return extractedUserId.equals(userId) && !isTokenExpired(token);
     }
 
     // 사용자 ID 추출
-    public static String extractUserId(String token) {
+    public String extractUserId(String token) {
         return extractClaims(token).getSubject();
     }
 
     // 만료 여부 확인
-    private static boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {
         return extractClaims(token).getExpiration().before(new Date());
     }
 
@@ -61,5 +73,3 @@ public class JwtUtil {
         return generateAccessToken(userId);  // 예시로 Access Token만 반환
     }
 }
-
-

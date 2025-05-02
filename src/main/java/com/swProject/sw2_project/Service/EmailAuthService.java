@@ -60,7 +60,6 @@ public class EmailAuthService {
 
             emailSender.send(message);
             log.info("회원가입 이메일 인증코드 -> userEmail:  " + userEmail + " 인증번호: " + authNumber);
-            log.info("ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ"+ authMap);
             return "전송 성공!";
 
         } catch (MailException e) {
