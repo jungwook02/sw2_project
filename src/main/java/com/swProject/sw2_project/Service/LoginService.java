@@ -11,8 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
+
 @Slf4j
 @Service
 public class LoginService {
@@ -40,12 +43,9 @@ public class LoginService {
 
             saveRefreshToken(userId, refreshToken);
             Date tokenExpiration = jwtUtil.extractClaims(accessToken).getExpiration();
-            CmmnUserLoginTokenDTO loginTokenDTO = new CmmnUserLoginTokenDTO(userId, refreshToken, tokenExpiration.toString());
+            CmmnUserLoginTokenDTO loginTokenDTO = new CmmnUserLoginTokenDTO(userId, refreshToken, tokenExpiration);
 
-            // CmmnUserLoginToken 엔티티 생성 후 저장
             saveUserLoginToken(loginTokenDTO);
-
-            // Access Token 반환
             return accessToken;  // 생성된 JWT 토큰 반환
         }
 
@@ -56,20 +56,36 @@ public class LoginService {
 
     // Refresh Token 저장
     public void saveRefreshToken(String userId, String refreshToken) {
-        // DTO 객체 생성
-        CmmnUserLoginTokenDTO loginTokenDTO = new CmmnUserLoginTokenDTO(userId, refreshToken, "7d");
+        Date exp = jwtUtil.extractClaims(refreshToken).getExpiration();
+        CmmnUserLoginTokenDTO loginTokenDTO = new CmmnUserLoginTokenDTO(userId, refreshToken, exp);
         saveUserLoginToken(loginTokenDTO);
     }
 
-    // UserLoginTokenDTO를 받아서 DB에 저장하는 메서드
-    private void saveUserLoginToken(CmmnUserLoginTokenDTO loginTokenDTO) {
-        // DTO -> Entity 변환
-        UserLoginTokenId tokenId = new UserLoginTokenId(loginTokenDTO.getUserId(), loginTokenDTO.getRefreshToken());
-        CmmnUserLoginToken userLoginToken = new CmmnUserLoginToken(tokenId, loginTokenDTO.getTokenExpiration());
+    @Transactional
+    public void saveUserLoginToken(CmmnUserLoginTokenDTO dto) {
+        // 사용자 정보 조회 (연관관계 설정용)
+        CmmnUserLogin user = cmmnUserLoginRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        // DB에 저장
-        cmmnUserLoginTokenRepository.save(userLoginToken);
+        // 기존 토큰이 존재하는지 확인 (여기서는 복합 조건을 사용)
+        Optional<CmmnUserLoginToken> existingToken = cmmnUserLoginTokenRepository
+                .findByChkUserId(dto.getUserId());
+
+        CmmnUserLoginToken entity;
+
+        if (existingToken.isPresent()) {
+            // 기존 토큰 존재 시 만료일자 갱신
+            entity = existingToken.get();
+            entity.setTokenExpDt(dto.getTokenExpiration());
+        } else {
+            // 새로운 토큰 생성
+            UserLoginTokenId tokenId = new UserLoginTokenId(dto.getRefreshToken(), dto.getUserId());
+            entity = new CmmnUserLoginToken(tokenId, dto.getTokenExpiration());
+        }
+
+        // 연관관계 설정
+        entity.setCmmnUserLogin(user);  // 사용자 정보 연결
+        cmmnUserLoginTokenRepository.save(entity);
     }
 }
-
 

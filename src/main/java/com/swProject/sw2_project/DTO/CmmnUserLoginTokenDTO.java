@@ -16,11 +16,9 @@ public class CmmnUserLoginTokenDTO {
     private Date tokenExpiration;
 
     // 생성자 수정
-    public CmmnUserLoginTokenDTO(String userId, String refreshToken, String tokenExpiration) {
+    public CmmnUserLoginTokenDTO(String userId, String refreshToken, Date tokenExpiration) {
         this.userId = userId;
         this.refreshToken = refreshToken;
-
-        // String을 Date로 변환
-        this.tokenExpiration = new Date(tokenExpiration);
+        this.tokenExpiration = tokenExpiration;
     }
 }

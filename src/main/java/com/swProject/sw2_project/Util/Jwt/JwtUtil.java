@@ -20,8 +20,10 @@ public class JwtUtil {
 
     // SecretKey를 반환하는 메소드
     private SecretKey getSigningKey() {
-        return Keys.secretKeyFor(SignatureAlgorithm.HS256);  // HS256에 적합한 SecretKey 생성
+        byte[] keyBytes = Base64.getDecoder().decode(secretKeyString);  // application.properties의 base64 문자열
+        return Keys.hmacShaKeyFor(keyBytes);  // HS256에 맞게 키 생성
     }
+
 
     // Access Token 생성
     public String generateAccessToken(String userId) {
